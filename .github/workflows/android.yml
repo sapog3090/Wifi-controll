@@ -25,6 +25,10 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # Не ставить устаревший пакет 'tools' (его больше нет в репозитории SDK);
+          # нужные платформы/build-tools AGP докачает сам при сборке.
+          packages: ""
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
