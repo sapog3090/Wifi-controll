@@ -1,0 +1,20 @@
+# Пример конфига агента. Реальный config/agent.yaml создаёт `wifictl init`
+# (он в .gitignore, т.к. содержит токен). Этот файл — только для справки.
+host: 0.0.0.0              # слушать на всех интерфейсах LAN
+port: 8765
+token: "ЗАМЕНИТЕ_НА_СЛУЧАЙНЫЙ_ТОКЕН"
+cert_path: "config/agent-cert.pem"
+key_path: "config/agent-key.pem"
+macros_path: "config/macros.yaml"
+audit_log: "audit.log"
+
+# Произвольные команды (не из макросов). По умолчанию выключено.
+# Включайте только на устройствах, которыми владеете / управляете с разрешения.
+allow_arbitrary: false
+
+# Необязательные ограничения по исполняемым файлам.
+# allow_binaries пуст => белого списка нет (разрешены любые, кроме deny).
+allow_binaries: []
+deny_binaries: ["rm", "shutdown", "reboot", "mkfs", "dd"]
+
+command_timeout: 30       # таймаут одной команды, сек

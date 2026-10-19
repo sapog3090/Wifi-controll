@@ -1,0 +1,20 @@
+# Секреты и локальные конфиги — НЕ коммитить
+*.pem
+*.key
+*.crt
+config/agent.yaml
+config/macros.yaml
+.wifictl/
+*.audit.log
+audit.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.venv/
+venv/
+.env

@@ -1,0 +1,33 @@
+# Пример макросов. Скопируйте в config/macros.yaml (его создаёт `wifictl init`)
+# и правьте под себя.
+#
+# Формат:
+#   macros:
+#     <ключевое_слово>:
+#       description: "..."        # необязательно
+#       params: [name, ...]       # необязательно, для подстановки {name}
+#       commands: ["cmd", ...]    # обязателен непустой список
+#
+# '@имя' в списке команд включает другой макрос (рекурсия запрещена).
+macros:
+  root:
+    description: "Снимок состояния системы"
+    commands:
+      - "whoami"
+      - "uptime"
+      - "df -h"
+  net:
+    description: "Сетевые интерфейсы"
+    commands:
+      - "ip -brief address || ifconfig"
+  full:
+    description: "root + память + сеть"
+    commands:
+      - "@root"
+      - "free -h"
+      - "@net"
+  deploy:
+    description: "Обновить проект (пример с параметром)"
+    params: [dir]
+    commands:
+      - "cd {dir} && git pull --ff-only"
