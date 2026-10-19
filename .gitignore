@@ -8,6 +8,17 @@ config/macros.yaml
 *.audit.log
 audit.log
 
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.jks
+*.keystore
+.gradle/
+
 # Python
 __pycache__/
 *.py[cod]

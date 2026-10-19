@@ -1,0 +1,40 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- WiFi-дуги -->
+    <path
+        android:fillColor="#4FD1C5"
+        android:pathData="M54,40 m-20,0 a20,20 0 1,0 40,0 a20,20 0 1,0 -40,0 Z"
+        android:fillAlpha="0" />
+    <path
+        android:strokeColor="#4FD1C5"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M38,46 A22,22 0 0 1 70,46" />
+    <path
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M44,52 A14,14 0 0 1 64,52" />
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M54,60 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z" />
+    <!-- Командный символ > _ -->
+    <path
+        android:strokeColor="#E2E8F0"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M46,70 l6,6 l-6,6" />
+    <path
+        android:strokeColor="#E2E8F0"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M58,82 l8,0" />
+</vector>
