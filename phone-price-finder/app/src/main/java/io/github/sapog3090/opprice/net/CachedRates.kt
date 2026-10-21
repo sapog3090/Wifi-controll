@@ -2,13 +2,12 @@ package io.github.sapog3090.opprice.net
 
 import android.content.Context
 import io.github.sapog3090.opprice.core.CbrRates
-import io.github.sapog3090.opprice.core.Fetcher
 import io.github.sapog3090.opprice.core.RateProvider
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /** Курсы ЦБ, обновляются не чаще раза в 12 часов; при недоступности ЦБ берётся последний известный курс. */
-class CachedRates(context: Context, private val fetcher: Fetcher) : RateProvider {
+class CachedRates(context: Context, private val http: SimpleHttp) : RateProvider {
 
     private val prefs = context.getSharedPreferences("rates", Context.MODE_PRIVATE)
     private val mutex = Mutex()
@@ -31,7 +30,7 @@ class CachedRates(context: Context, private val fetcher: Fetcher) : RateProvider
     }
 
     private suspend fun refresh() {
-        val rates = runCatching { fetcher.get(CbrRates.URL, emptyMap()) }
+        val rates = runCatching { http.get(CbrRates.URL) }
             .getOrNull()
             ?.takeIf { it.code == 200 }
             ?.let { CbrRates.parse(it.body) }

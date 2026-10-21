@@ -19,7 +19,7 @@ class AvitoSource(private val fetcher: Fetcher) : OfferSource {
     override fun browserUrl(query: String) = "https://www.avito.ru/rossiya/telefony?q=${enc(query)}"
 
     override suspend fun search(query: String): List<Listing> = collectPages(PAGES) { page ->
-        val r = fetcher.get(browserUrl(query) + "&p=$page", HEADERS)
+        val r = fetcher.page(browserUrl(query) + "&p=$page", readySelector = "[data-marker=item]")
         if (r.code == 403 || r.code == 429) {
             throw SourceException(FailureKind.BLOCKED, "Avito ограничил доступ (HTTP ${r.code})")
         }
@@ -29,7 +29,6 @@ class AvitoSource(private val fetcher: Fetcher) : OfferSource {
 
     companion object {
         private const val PAGES = 2
-        private val HEADERS = mapOf("Referer" to "https://www.avito.ru/")
         private val NOTHING_FOUND = Regex("""ничего не найдено|не нашли|нет объявлений""", RegexOption.IGNORE_CASE)
 
         fun parse(html: String): List<Listing> {

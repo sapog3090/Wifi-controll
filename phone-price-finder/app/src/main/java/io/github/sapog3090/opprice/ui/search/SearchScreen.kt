@@ -75,7 +75,7 @@ import io.github.sapog3090.opprice.work.Notifier
 import kotlin.math.roundToInt
 
 @Composable
-fun SearchScreen(vm: SearchViewModel, openUrl: (String) -> Unit) {
+fun SearchScreen(vm: SearchViewModel, openUrl: (String) -> Unit, openInApp: (String) -> Unit) {
     val context = LocalContext.current
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     var showHidden by rememberSaveable { mutableStateOf(false) }
@@ -84,7 +84,7 @@ fun SearchScreen(vm: SearchViewModel, openUrl: (String) -> Unit) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
         item { QueryBar(vm) }
         item { SourceStrip(vm) }
-        item { Failures(vm, openUrl) }
+        item { Failures(vm, openInApp) }
         if (vm.searched != null) {
             item { Filters(vm) }
             item {
@@ -186,7 +186,7 @@ private fun SourceStrip(vm: SearchViewModel) {
 }
 
 @Composable
-private fun Failures(vm: SearchViewModel, openUrl: (String) -> Unit) {
+private fun Failures(vm: SearchViewModel, openInApp: (String) -> Unit) {
     val failed = vm.states.mapNotNull { (s, st) -> (st as? SourceState.Failed)?.let { s to it } }
     if (failed.isEmpty()) return
     Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp)) {
@@ -200,7 +200,9 @@ private fun Failures(vm: SearchViewModel, openUrl: (String) -> Unit) {
                 )
                 val url = vm.browserUrl(source)
                 if (url != null && f.kind != FailureKind.NETWORK) {
-                    TextButton(onClick = { openUrl(url) }) { Text("Открыть сайт") }
+                    TextButton(onClick = { openInApp(url) }) {
+                        Text(if (f.kind == FailureKind.BLOCKED) "Пройти проверку" else "Открыть")
+                    }
                 }
             }
         }
@@ -274,6 +276,13 @@ private fun Summary(vm: SearchViewModel, onTrack: () -> Unit) {
                             "${r.offers.size} ${plural(r.offers.size, "предложение", "предложения", "предложений")}",
                             r.median?.let { "медиана ${rub(it)}" },
                         ).joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else if (vm.allFailed) {
+                    Text("Площадки не ответили", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Нажми «Пройти проверку» у площадки выше — поиск повторится сам",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

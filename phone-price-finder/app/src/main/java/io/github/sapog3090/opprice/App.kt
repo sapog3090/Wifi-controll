@@ -10,8 +10,9 @@ import io.github.sapog3090.opprice.core.sources.WildberriesSource
 import io.github.sapog3090.opprice.data.AppDatabase
 import io.github.sapog3090.opprice.data.Settings
 import io.github.sapog3090.opprice.data.TrackRepository
+import io.github.sapog3090.opprice.net.BrowserFetcher
 import io.github.sapog3090.opprice.net.CachedRates
-import io.github.sapog3090.opprice.net.OkHttpFetcher
+import io.github.sapog3090.opprice.net.SimpleHttp
 import io.github.sapog3090.opprice.work.Notifier
 import io.github.sapog3090.opprice.work.PriceCheckScheduler
 
@@ -30,8 +31,8 @@ class App : Application() {
 /** Ручная сборка зависимостей: их немного, DI-фреймворк тут был бы лишним. */
 class AppContainer(context: Context) {
     val settings = Settings(context)
-    private val fetcher = OkHttpFetcher()
-    val rates = CachedRates(context, fetcher)
+    private val fetcher = BrowserFetcher(context)
+    val rates = CachedRates(context, SimpleHttp())
     val engine = SearchEngine(
         listOf(
             WildberriesSource(fetcher),

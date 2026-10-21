@@ -25,29 +25,39 @@ class WildberriesSource(private val fetcher: Fetcher) : OfferSource {
         parse(fetchPage(query, page))
     }
 
+    /** Адрес, который сработал в прошлый раз, пробуем первым. */
+    @Volatile private var workingEndpoint: String? = null
+
     private suspend fun fetchPage(query: String, page: Int): String {
-        var lastCode = 0
-        for (version in API_VERSIONS) {
-            val url = "https://search.wb.ru/exactmatch/ru/common/$version/search" +
-                "?ab_testing=false&appType=1&curr=rub&dest=-1257786&lang=ru&page=$page" +
-                "&query=${enc(query)}&resultset=catalog&sort=popular&spp=30&suppressSpellcheck=false"
-            val r = fetcher.get(url, HEADERS)
-            when (r.code) {
-                200 -> return r.body
-                403, 429 -> throw SourceException(FailureKind.BLOCKED, "WB ограничил запросы (HTTP ${r.code})")
-                else -> lastCode = r.code
+        val params = "?ab_testing=false&appType=1&curr=rub&dest=-1257786&lang=ru&page=$page" +
+            "&query=${enc(query)}&resultset=catalog&sort=popular&spp=30&suppressSpellcheck=false"
+        val endpoints = listOfNotNull(workingEndpoint) + (ENDPOINTS - setOfNotNull(workingEndpoint))
+        val seen = mutableListOf<String>()
+        var blocked = false
+        for (endpoint in endpoints) {
+            val r = fetcher.api(endpoint + params, ORIGIN)
+            if (r.code == 200 && r.body.trimStart().startsWith("{")) {
+                workingEndpoint = endpoint
+                return r.body
             }
+            if (r.code == 403 || r.code == 429 || r.code == 498) blocked = true
+            seen += if (r.code == -1) "сеть" else "${r.code}"
         }
-        throw SourceException(FailureKind.HTTP, "HTTP $lastCode")
+        if (blocked) throw SourceException(FailureKind.BLOCKED, "WB не пустил запрос — нужна проверка на сайте")
+        throw SourceException(FailureKind.HTTP, "поиск не ответил (${seen.distinct().joinToString()})")
     }
 
     companion object {
         private const val PAGES = 2
-        private val API_VERSIONS = listOf("v13", "v9", "v5")
-        private val HEADERS = mapOf(
-            "Accept" to "application/json",
-            "Origin" to "https://www.wildberries.ru",
-            "Referer" to "https://www.wildberries.ru/",
+        private const val ORIGIN = "https://www.wildberries.ru/"
+
+        // Сайт периодически переносит поиск и меняет версию в пути.
+        private val ENDPOINTS = listOf(
+            "https://www.wildberries.ru/__internal/search/exactmatch/ru/common/v18/search",
+            "https://search.wb.ru/exactmatch/ru/common/v18/search",
+            "https://search.wb.ru/exactmatch/ru/common/v14/search",
+            "https://search.wb.ru/exactmatch/ru/common/v13/search",
+            "https://search.wb.ru/exactmatch/ru/common/v9/search",
         )
 
         fun parse(body: String): List<Listing> {

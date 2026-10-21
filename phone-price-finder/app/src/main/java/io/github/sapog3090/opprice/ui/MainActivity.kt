@@ -64,6 +64,7 @@ private fun AppRoot(c: AppContainer) {
     val context = LocalContext.current
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var openTrack by rememberSaveable { mutableStateOf<Long?>(null) }
+    var browserUrl by rememberSaveable { mutableStateOf<String?>(null) }
     val interval by c.settings.intervalHours.collectAsStateWithLifecycle()
     val searchVm = viewModel { SearchViewModel(c) }
     val listVm = viewModel { TrackListViewModel(c.tracks) }
@@ -76,12 +77,18 @@ private fun AppRoot(c: AppContainer) {
         }
     }
 
-    BackHandler(enabled = openTrack != null) { openTrack = null }
+    val closeBrowser = {
+        browserUrl = null
+        searchVm.retry()
+    }
+
+    BackHandler(enabled = browserUrl != null) { closeBrowser() }
+    BackHandler(enabled = browserUrl == null && openTrack != null) { openTrack = null }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            if (openTrack == null) {
+            if (openTrack == null && browserUrl == null) {
                 NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
                     Tab.entries.forEachIndexed { i, t ->
                         NavigationBarItem(
@@ -100,12 +107,14 @@ private fun AppRoot(c: AppContainer) {
     ) { padding ->
         Box(Modifier.padding(padding)) {
             val trackId = openTrack
+            val inApp = browserUrl
             when {
+                inApp != null -> BrowserScreen(inApp, onDone = closeBrowser)
                 trackId != null -> {
                     val vm = viewModel(key = "track-$trackId") { TrackDetailViewModel(trackId, c.tracks) }
                     TrackDetailScreen(vm, onBack = { openTrack = null }, openUrl = openUrl)
                 }
-                tab == Tab.SEARCH.ordinal -> SearchScreen(searchVm, openUrl)
+                tab == Tab.SEARCH.ordinal -> SearchScreen(searchVm, openUrl, openInApp = { browserUrl = it })
                 tab == Tab.TRACKED.ordinal -> TrackListScreen(listVm, interval, onOpen = { openTrack = it })
                 else -> SettingsScreen(c)
             }

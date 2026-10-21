@@ -19,7 +19,7 @@ class AliExpressSource(private val fetcher: Fetcher) : OfferSource {
     override fun browserUrl(query: String) = "https://aliexpress.ru/wholesale?SearchText=${enc(query)}&g=y"
 
     override suspend fun search(query: String): List<Listing> {
-        val r = fetcher.get(browserUrl(query), mapOf("Referer" to "https://aliexpress.ru/"))
+        val r = fetcher.page(browserUrl(query))
         if (r.code == 403 || r.code == 429) {
             throw SourceException(FailureKind.BLOCKED, "AliExpress ограничил доступ (HTTP ${r.code})")
         }

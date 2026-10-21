@@ -38,6 +38,7 @@ class SearchViewModel(private val c: AppContainer) : ViewModel() {
     val result by derivedStateOf { OfferFilter.apply(spec, offers) }
     val facets by derivedStateOf { OfferFilter.facets(spec, offers) }
     val loading by derivedStateOf { states.values.any { it == SourceState.Loading } }
+    val allFailed by derivedStateOf { states.isNotEmpty() && states.values.all { it is SourceState.Failed } }
 
     private var job: Job? = null
 
@@ -48,8 +49,13 @@ class SearchViewModel(private val c: AppContainer) : ViewModel() {
         c.settings.setSources(next)
     }
 
-    fun search() {
-        val text = query.trim().ifEmpty { return }
+    /** Повторяет последний поиск — например, после ручного прохождения капчи. */
+    fun retry() {
+        searched?.let { search(it) }
+    }
+
+    fun search(text: String = query.trim()) {
+        if (text.isEmpty()) return
         job?.cancel()
         searched = text
         trackedId = null
