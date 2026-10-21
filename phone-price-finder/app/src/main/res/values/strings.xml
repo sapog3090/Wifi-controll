@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Цены на смартфоны</string>
+    <string name="channel_drops">Снижение цен</string>
+    <string name="channel_drops_desc">Сообщает, когда минимальная цена по отслеживаемому запросу упала</string>
+</resources>
