@@ -39,10 +39,10 @@ fun money(m: Money): String {
     return symbol + groupDigits(whole)
 }
 
-fun memory(m: Memory?): String? = when {
-    m?.storageGb == null -> null
-    m.ramGb != null -> "${m.ramGb}/${storage(m.storageGb)}"
-    else -> storage(m.storageGb)
+fun memory(m: Memory?): String? {
+    val gb = m?.storageGb ?: return null
+    val ram = m.ramGb
+    return if (ram != null) "$ram/${storage(gb)}" else storage(gb)
 }
 
 fun storage(gb: Int): String = if (gb >= 1024) "${gb / 1024}${NBSP}ТБ" else "$gb${NBSP}ГБ"
