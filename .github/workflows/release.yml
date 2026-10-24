@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build package
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wifictl-dist
+          path: dist/*
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: wifictl 0.1.0
+          prerelease: false
+          files: dist/*
+          body: |
+            ## wifictl 0.1.0
+
+            Управление своими или авторизованными устройствами по локальной сети
+            из терминала: ключевое слово запускает заранее заданный макрос команд.
+
+            ⚠️ Только для устройств, которыми вы владеете или на управление которыми
+            есть явное разрешение владельца.
+
+            **Установка:**
+            ```
+            pip install wifictl-0.1.0-py3-none-any.whl
+            ```
+            Архивы пакета — во вложениях к релизу, исходники — ниже.
